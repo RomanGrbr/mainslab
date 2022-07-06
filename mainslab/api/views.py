@@ -18,48 +18,44 @@ SERVICE_CHOICE = {
 ALLOWED_EXTENSIONS = {"xlsm", "xlsx", "xlsb", "xls"}
 
 
-def allowed_file(filename: str) -> bool:
-    """ Функция проверки допустимого расширения файла """
-    return "." in filename and \
-        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+class ClientsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
 
 
-def fraud_score(service: str) -> float:
-    """Детектор мошенничества"""
-    return round(random.uniform(0, 1), 2)
+class CheckViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Bills.objects.all()
+    serializer_class = CheckSerializer
+    filterset_fields = ("clinet_name", "client_org")
 
 
-def address_normal(addr: str) -> str:
-    """Нормализация адресса"""
-    if addr and addr != '-':
-        normaddr = 'Адрес: ' + addr
-    return normaddr
+class UploadeViewSet(viewsets.ViewSet):
+    serializer_class = UploadSerializer
+
+    def list(self, request):
+        return Response("GET API")
+
+    def create(self, request):
+        file_uploaded = request.FILES.get("file_uploaded")
+        allowed = allowed_file(str(file_uploaded))
+        if allowed:
+            wb = openpyxl.load_workbook(file_uploaded)
+            filename = str(file_uploaded).rsplit(".", 1)[0].lower()
+            uploaded(wb, filename)
+
+            content_type = file_uploaded.content_type
+            response = f"Вы загрузили файл {content_type}"
+            return Response(response)
+        else:
+            response = "Выберите файл Excel"
+            return Response(response)
 
 
-def classifier_of_services(serv: str):
-    """Классификатор услуг"""
-    DICT_SERVICE = {
-        1: "консультация",
-        2: "лечение",
-        3: "стационар",
-        4: "диагностика",
-        5: "лаборатория"
-        }
-    service_num = random.randint(1, 5)
-    service_class = service_num,
-    service_name = DICT_SERVICE[service_num]
-    return service_class, service_name
-
-
-def excel_data_uploade(worksheet) -> list:
-    """Формирование списка данных из полученного листа Excel"""
-    excel_data = list()
-    for row in worksheet.iter_rows():
-        row_data = list()
-        for cell in row:
-            row_data.append(str(cell.value))
-        excel_data.append(row_data)
-    return excel_data
+def uploaded(file, file_name):
+    """Выбор функции для загрузки в зависимости от названия файла"""
+    dict_name = {"client_org": client_org, "bills": bills}
+    func = dict_name[file_name]
+    return func(file)
 
 
 def client_org(file):
@@ -123,41 +119,45 @@ def bills(file):
             print("Загрузка завершена")
 
 
-def uploaded(file, file_name):
-    """Выбор функции для загрузки в зависимости от названия файла"""
-    dict_name = {"client_org": client_org, "bills": bills}
-    func = dict_name[file_name]
-    return func(file)
+def excel_data_uploade(worksheet) -> list:
+    """Формирование списка данных из полученного листа Excel"""
+    excel_data = list()
+    for row in worksheet.iter_rows():
+        row_data = list()
+        for cell in row:
+            row_data.append(str(cell.value))
+        excel_data.append(row_data)
+    return excel_data
 
 
-class ClientsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Client.objects.all()
-    serializer_class = ClientSerializer
+def allowed_file(filename: str) -> bool:
+    """ Функция проверки допустимого расширения файла """
+    return "." in filename and \
+        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-class CheckViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Bills.objects.all()
-    serializer_class = CheckSerializer
-    filterset_fields = ("clinet_name", "client_org")
+def fraud_score(service: str) -> float:
+    """Детектор мошенничества"""
+    return round(random.uniform(0, 1), 2)
 
 
-class UploadeViewSet(viewsets.ViewSet):
-    serializer_class = UploadSerializer
+def address_normal(addr: str) -> str:
+    """Нормализация адресса"""
+    if addr and addr != '-':
+        normaddr = 'Адрес: ' + addr
+    return normaddr
 
-    def list(self, request):
-        return Response("GET API")
 
-    def create(self, request):
-        file_uploaded = request.FILES.get("file_uploaded")
-        allowed = allowed_file(str(file_uploaded))
-        if allowed:
-            wb = openpyxl.load_workbook(file_uploaded)
-            filename = str(file_uploaded).rsplit(".", 1)[0].lower()
-            uploaded(wb, filename)
-
-            content_type = file_uploaded.content_type
-            response = f"Вы загрузили файл {content_type}"
-            return Response(response)
-        else:
-            response = "Выберите файл Excel"
-            return Response(response)
+def classifier_of_services(serv: str):
+    """Классификатор услуг"""
+    DICT_SERVICE = {
+        1: "консультация",
+        2: "лечение",
+        3: "стационар",
+        4: "диагностика",
+        5: "лаборатория"
+        }
+    service_num = random.randint(1, 5)
+    service_class = service_num,
+    service_name = DICT_SERVICE[service_num]
+    return service_class, service_name
