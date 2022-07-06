@@ -9,8 +9,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('name', 'count_org', 'check_sum_all_org')
-        # fields = ('name', 'count_org')
+        fields = ("name", "count_org", "check_sum_all_org")
 
     def get_count_org(self, obj):
         return Client.objects.filter(organizations__client_name=obj.id).count()
@@ -26,11 +25,11 @@ class ClientSerializer(serializers.ModelSerializer):
 class CheckSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bills
-        fields = '__all__'
+        fields = "__all__"
 
 
 class UploadSerializer(serializers.Serializer):
     file_uploaded = serializers.FileField()
 
     class Meta:
-        fields = ['file_uploaded']
+        fields = ["file_uploaded"]

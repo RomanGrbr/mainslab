@@ -8,11 +8,11 @@ from api.models import Bills, Client, Organization
 from api.serializers import CheckSerializer, ClientSerializer, UploadSerializer
 
 SERVICE_CHOICE = {
-    1: 'консультация',
-    2: 'лечение',
-    3: 'стационар',
-    4: 'диагностика',
-    5: 'лаборатория'
+    1: "консультация",
+    2: "лечение",
+    3: "стационар",
+    4: "диагностика",
+    5: "лаборатория"
 }
 
 ALLOWED_EXTENSIONS = {"xlsm", "xlsx", "xlsb", "xls"}
@@ -25,22 +25,25 @@ def allowed_file(filename: str) -> bool:
 
 
 def fraud_score(service: str) -> float:
+    """Детектор мошенничества"""
     return round(random.uniform(0, 1), 2)
 
 
 def address_normal(addr):
+    """Нормализация адресса"""
     if addr:
         normaddr = 'Адрес: ' + addr
     return normaddr
 
 
 def classifier_of_services(serv: str):
+    """Классификатор услуг"""
     DICT_SERVICE = {
-        1: 'консультация',
-        2: 'лечение',
-        3: 'стационар',
-        4: 'диагностика',
-        5: 'лаборатория'
+        1: "консультация",
+        2: "лечение",
+        3: "стационар",
+        4: "диагностика",
+        5: "лаборатория"
         }
     service_num = random.randint(1, 5)
     service_class = service_num,
@@ -49,7 +52,7 @@ def classifier_of_services(serv: str):
 
 
 def client_org(file):
-    worksheet = file['client']
+    worksheet = file["client"]
     excel_data = list()
     for row in worksheet.iter_rows():
         row_data = list()
@@ -60,7 +63,7 @@ def client_org(file):
         if not Client.objects.filter(name=i[0]).exists():
             Client.objects.create(name=i[0])
 
-    worksheet = file['organization']
+    worksheet = file["organization"]
     excel_data = list()
     for row in worksheet.iter_rows():
         row_data = list()
@@ -81,7 +84,7 @@ def client_org(file):
     except IndexError as e:
         print(e)
     finally:
-        print('Загрузка завершена')
+        print("Загрузка завершена")
 
 
 def bills(file):
@@ -118,11 +121,11 @@ def bills(file):
         except Exception as e:
             print(e)
         finally:
-            print('Загрузка завершена')
+            print("Загрузка завершена")
 
 
 def uploaded(file, file_name):
-    dict_name = {'client_org': client_org, 'bills': bills}
+    dict_name = {"client_org": client_org, "bills": bills}
     func = dict_name[file_name]
     return func(file)
 
@@ -135,7 +138,7 @@ class ClientsViewSet(viewsets.ReadOnlyModelViewSet):
 class CheckViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Bills.objects.all()
     serializer_class = CheckSerializer
-    filterset_fields = ('clinet_name', 'client_org')
+    filterset_fields = ("clinet_name", "client_org")
 
 
 class UploadeViewSet(viewsets.ViewSet):
@@ -145,7 +148,7 @@ class UploadeViewSet(viewsets.ViewSet):
         return Response("GET API")
 
     def create(self, request):
-        file_uploaded = request.FILES.get('file_uploaded')
+        file_uploaded = request.FILES.get("file_uploaded")
         wb = openpyxl.load_workbook(file_uploaded)
         allowed = allowed_file(str(file_uploaded))
         if allowed:

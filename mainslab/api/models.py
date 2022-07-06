@@ -32,7 +32,7 @@ class Bills(models.Model):
                                     related_name='bills')
     client_org = models.ForeignKey(Organization, on_delete=models.CASCADE,
                                    verbose_name='Название организации',
-                                   max_length=200,related_name='bills')
+                                   max_length=200, related_name='bills')
     check_number = models.IntegerField(verbose_name='Номер счета')
     check_sum = models.IntegerField(verbose_name='Сумма счета')
     date = models.DateTimeField(verbose_name='Дата счета')
