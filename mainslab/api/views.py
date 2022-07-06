@@ -59,9 +59,9 @@ def client_org(file):
         for cell in row:
             row_data.append(str(cell.value))
         excel_data.append(row_data)
-    for i in excel_data[1:]:
-        if not Client.objects.filter(name=i[0]).exists():
-            Client.objects.create(name=i[0])
+    for row in excel_data[1:]:
+        if not Client.objects.filter(name=row[0]).exists():
+            Client.objects.create(name=row[0])
 
     worksheet = file["organization"]
     excel_data = list()
@@ -149,12 +149,15 @@ class UploadeViewSet(viewsets.ViewSet):
 
     def create(self, request):
         file_uploaded = request.FILES.get("file_uploaded")
-        wb = openpyxl.load_workbook(file_uploaded)
         allowed = allowed_file(str(file_uploaded))
         if allowed:
+            wb = openpyxl.load_workbook(file_uploaded)
             filename = str(file_uploaded).rsplit(".", 1)[0].lower()
             uploaded(wb, filename)
 
-        content_type = file_uploaded.content_type
-        response = "You have uploaded a {} file".format(content_type)
-        return Response(response)
+            content_type = file_uploaded.content_type
+            response = f"Вы загрузили файл {content_type}"
+            return Response(response)
+        else:
+            response = "Выберите файл Excel"
+            return Response(response)
