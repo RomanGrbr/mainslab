@@ -66,18 +66,19 @@ def client_org(file):
     """Запись в базу моделей Client и Organization"""
     worksheet = file["client"]
     excel_data = excel_data_uploade(worksheet)
-    for row in excel_data[1:]:
-        if not Client.objects.filter(name=row[0]).exists():
-            Client.objects.create(name=row[0])
+    for data in excel_data[1:]:
+        if not Client.objects.filter(name=data[0]).exists():
+            Client.objects.create(name=data[0])
 
     worksheet = file["organization"]
     excel_data = excel_data_uploade(worksheet)
     try:
-        for i in excel_data[1:]:
-            client_name, name, address = i
+        for data in excel_data[1:]:
+            client_name, name, address = data
             if not Organization.objects.filter(
                 client_name=Client.objects.filter(
                     name=client_name)[0], name=name).exists():
+
                 Organization.objects.create(
                     client_name=Client.objects.filter(name=client_name)[0],
                     name=name,
@@ -93,8 +94,8 @@ def bills(file):
     sheets = file.sheetnames
     worksheet = file[sheets[0]]
     excel_data = excel_data_uploade(worksheet)
-    for i in excel_data[1:]:
-        client_name, client_org, check_number, check_sum, date, service, *last = i
+    for data in excel_data[1:]:
+        client_name, client_org, check_number, check_sum, date, service, *last = data
         service_class, service_name = classifier_of_services(service)
         try:
             frag_num = fraud_score(service)
