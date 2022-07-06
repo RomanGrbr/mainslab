@@ -9,8 +9,7 @@ class Client(models.Model):
 
 
 class Organization(models.Model):
-    client_name = models.ForeignKey(Client, on_delete=models.SET_NULL, 
-                                    null=True,
+    client_name = models.ForeignKey(Client, on_delete=models.CASCADE,
                                     related_name='organizations')
     name = models.CharField(
         verbose_name='Название организации', max_length=200)
@@ -23,15 +22,17 @@ class Organization(models.Model):
             models.UniqueConstraint(fields=['name', 'client_name'],
                                     name='unique_org_name_client_name')
         ]
-    
+
     def __str__(self):
         return f'{self.name}'
 
+
 class Bills(models.Model):
-    clinet_name = models.ForeignKey(Client, on_delete=models.CASCADE, 
-                                        related_name='bills')
+    clinet_name = models.ForeignKey(Client, on_delete=models.CASCADE,
+                                    related_name='bills')
     client_org = models.ForeignKey(Organization, on_delete=models.CASCADE,
-        verbose_name='Название организации', max_length=200, related_name='bills')
+                                   verbose_name='Название организации',
+                                   max_length=200,related_name='bills')
     check_number = models.IntegerField(verbose_name='Номер счета')
     check_sum = models.IntegerField(verbose_name='Сумма счета')
     date = models.DateTimeField(verbose_name='Дата счета')
