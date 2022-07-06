@@ -29,7 +29,7 @@ def fraud_score(service: str) -> float:
     return round(random.uniform(0, 1), 2)
 
 
-def address_normal(addr):
+def address_normal(addr: str) -> str:
     """Нормализация адресса"""
     if addr:
         normaddr = 'Адрес: ' + addr
@@ -51,25 +51,27 @@ def classifier_of_services(serv: str):
     return service_class, service_name
 
 
-def client_org(file):
-    worksheet = file["client"]
+def excel_data_uploade(worksheet) -> list:
+    """Формирование списка данных из полученного листа Excel"""
     excel_data = list()
     for row in worksheet.iter_rows():
         row_data = list()
         for cell in row:
             row_data.append(str(cell.value))
         excel_data.append(row_data)
+    return excel_data
+
+
+def client_org(file):
+    """Запись в базу моделей Client и Organization"""
+    worksheet = file["client"]
+    excel_data = excel_data_uploade(worksheet)
     for row in excel_data[1:]:
         if not Client.objects.filter(name=row[0]).exists():
             Client.objects.create(name=row[0])
 
     worksheet = file["organization"]
-    excel_data = list()
-    for row in worksheet.iter_rows():
-        row_data = list()
-        for cell in row:
-            row_data.append(str(cell.value))
-        excel_data.append(row_data)
+    excel_data = excel_data_uploade(worksheet)
     try:
         for i in excel_data[1:]:
             client_name, name, address = i
@@ -90,12 +92,7 @@ def client_org(file):
 def bills(file):
     sheets = file.sheetnames
     worksheet = file[sheets[0]]
-    excel_data = list()
-    for row in worksheet.iter_rows():
-        row_data = list()
-        for cell in row:
-            row_data.append(str(cell.value))
-        excel_data.append(row_data)
+    excel_data = excel_data_uploade(worksheet)
     for i in excel_data[1:]:
         client_name, client_org, check_number, check_sum, date, service, *last = i
         service_class, service_name = classifier_of_services(service)
