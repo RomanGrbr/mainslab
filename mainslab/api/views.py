@@ -31,7 +31,7 @@ def fraud_score(service: str) -> float:
 
 def address_normal(addr: str) -> str:
     """Нормализация адресса"""
-    if addr:
+    if addr and addr != '-':
         normaddr = 'Адрес: ' + addr
     return normaddr
 
@@ -91,6 +91,7 @@ def client_org(file):
 
 
 def bills(file):
+    """Запись в базу модели Bills"""
     sheets = file.sheetnames
     worksheet = file[sheets[0]]
     excel_data = excel_data_uploade(worksheet)
@@ -123,6 +124,7 @@ def bills(file):
 
 
 def uploaded(file, file_name):
+    """Выбор функции для загрузки в зависимости от названия файла"""
     dict_name = {"client_org": client_org, "bills": bills}
     func = dict_name[file_name]
     return func(file)
